@@ -1,0 +1,89 @@
+{% macro render_field(field) -%}
+    {% set with_label = kwargs.pop('with_label', False) %}
+    {% set placeholder = '' %}
+    {% if not with_label %}
+        {% set placeholder = field.label.text %}
+    {% endif %}
+    <div class="form-group {% if field.errors %}error{% endif %}">
+        {% if with_label %}
+            <label for="{{ field.id }}" class="control-label">
+                {{ field.label.text }}{% if field.flags.required %} *{% endif %}:
+            </label>
+        {% endif %}
+        
+        {% set class_ = kwargs.pop('class_', '') %}
+        {% if field.flags.required %}
+            {% set class_ = class_ + ' required' %}
+        {% endif %}
+
+        {% if field.type == 'BooleanField' %}
+            <div class="checkbox">
+                <label>
+                    {{ field(class_=class_, **kwargs) }}
+                    {{ field.label.text|safe }}
+                </label>
+            </div>
+
+        {% else %}
+       
+            {% if field.type in ('TextField', 'TextAreaField', 'PasswordField', 'URLField') %}
+                {% set class_ = class_ + ' input-xlarge' %}
+          
+            {% elif field.type == 'FileField' %}
+                {% set class_ = class_ + ' input-file' %}
+            {% endif %}
+
+            {% if field.type == 'SelectField' %}
+                {{ field(class_=class_, **kwargs) }}
+            {% else %}
+              
+            {{ field(class_=class_, placeholder=placeholder, **kwargs) }}
+            {% endif %}
+      
+        {% endif %}
+        {% if field.errors %}
+            <div class="alert alert-danger alert-dismissible fade show m-1" style="border: none;display: inline-block">
+            	<strong>Oops!</strong> {{ field.errors|join(', ') }}
+                <a href="#" class="close" data-dismiss="alert" style="float: none;">&times;</a>
+            </div>
+        {% endif %}
+        {% if field.description %}
+            <p class="help-block">{{ field.description|safe }}</p>
+        {% endif %}
+    </div>
+{%- endmacro %}
+
+{% macro display_flash_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="">
+                <div class="row ml-auto pull-right" style="position:fixed; top: 100px !important; right: 25px !important;z-index: 2">
+                    <div class="alert-group" style="width:100%">
+                        {% for category, message in messages %}
+                            {% if category == 'error' %}
+                                <div class="alert mr-1 mb-1 alert-danger alert-dismissible fade show" >
+                                    <strong>Error: </strong>
+
+                            {% elif category == 'warning' %}
+                                <div class="alert mr-1 mb-1 alert-warning alert-dismissible fade show" >
+                                    <strong>Warning: </strong>
+
+                            {% elif category == 'success' %}
+                                <div class="alert mr-1 mb-1 alert-success alert-dismissible fade show" >
+                                    <strong>Success: </strong>
+
+                            {% elif category == 'info' %}
+                                <div class="alert mr-1 mb-1 alert-info alert-dismissible fade show" >
+                                    <strong>Note: </strong>
+
+                            {% endif %}
+                                    {{ message }}
+                                    <a href="#" class="close" data-dismiss="alert" style="float: none;">&times;</a>
+                                </div>
+                        {% endfor %}
+                            </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endwith %}
+{%  endmacro %}
